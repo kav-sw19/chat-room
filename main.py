@@ -58,7 +58,11 @@ def home():
 
 @app.route('/room')
 def room():
-    return render_template('room.html')
+    room = session.get('room')
+    if room is None or session.get('name') is None or room not in rooms:
+        return redirect(url_for('home'))
+
+    return render_template('room.html', code=room, messages=rooms[room]['messages'])
 
 
 if __name__ == '__main__':

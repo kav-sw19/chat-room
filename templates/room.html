@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="message-box">
+    <h2>Room: {{code}}</h2>
+    <div class="messages" id="messages"></div>
+    <div class="inputs">
+        <input type="text" 
+        rows="3" 
+        placeholder="Message" 
+        name="message" 
+        id="message"
+        />
+        <button type="submit" name="send" id="send-btn" onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<!--Socket.io-->
+<script type="text/javascript">
+    var socket = io();
+
+    const sendMessage = () => {
+        console.log("Message sent");
+    }
+</script>
+
+{% endblock %}
