@@ -3,6 +3,17 @@
 {% block content %}
 <div class="message-box">
     <h2>Room: {{code}}</h2>
+    
+    <!-- New section for displaying members -->
+    <div class="members">
+        <h3>Members:</h3>
+        <ul id="members-list">
+            {% for member in members %}
+                <li>{{ member }}{% if member == session.get('name') %} (Me){% endif %}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    
     <div class="messages" id="messages"></div>
     <div class="inputs">
         <input type="text" 
@@ -43,8 +54,15 @@
     });
 
     const sendMessage = () => {
-        console.log("Message sent");
+        const message = document.getElementById('message')
+        if (message.value == "") return;
+        socket.emit('message', {data: message.value});
+        message.value = "";
     };
 </script>
-
+{% for msg in messages %}
+    <script type="text/javascript">
+        createMessage("{{msg.name}}", "{{msg.message}}");
+    </script>
+{% endfor %}
 {% endblock %}

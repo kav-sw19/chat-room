@@ -42,7 +42,7 @@ def home():
         room = code
         if create != False:
             room = generate_unique_code(4)
-            rooms[room] = {"members": 0, "messages": []}
+            rooms[room] = {"members": [], "messages": []}
 
         #Room does not exist
         elif code not in rooms:
@@ -62,7 +62,29 @@ def room():
     if room is None or session.get('name') is None or room not in rooms:
         return redirect(url_for('home'))
 
-    return render_template('room.html', code=room, messages=rooms[room]['messages'])
+    # Get the list of members in the room
+    members = [session.get('name')]  # Start with the current user
+    for member in rooms[room]['members']:
+        if member != session.get('name'):
+            members.append(member)
+
+    return render_template('room.html', code=room, messages=rooms[room]['messages'], members=members)
+
+#This function handles incoming messages from clients.
+@socketio.on('message')
+def message(data):
+    room = session.get('room')
+    if room not in rooms:
+        return
+    
+    content = {
+        "name": session.get('name'),
+        "message": data.get('data')
+    }
+    #Sends the message to the room and appends it to room list
+    send(content, to=room)
+    rooms[room]['messages'].append(content)
+    print(f"{session.get('name')} said: {data.get('data')}")
 
 @socketio.on('connect')
 def connect(auth):
@@ -80,7 +102,9 @@ def connect(auth):
     join_room(room)
     #Sends a message to the room that user has entered
     send({"name": name, "message": "has entered the room"}, to=room)
-    rooms[room]['members'] += 1
+    
+    # Add the user to the room's member list
+    rooms[room]['members'].append(name)
     print(f"{name} joined room {room}")
 
 @socketio.on('disconnect')
@@ -91,9 +115,9 @@ def disconnect():
 
     #Removes the user from the room
     if room in rooms:
-        rooms[room]['members'] -= 1
+        rooms[room]['members'].remove(name)
         #If there are no members in the room, delete the room
-        if rooms[room]['members'] <= 0:
+        if not rooms[room]['members']:
             del rooms[room]
 
     #Sends a message to the room that user has left
