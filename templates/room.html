@@ -2,14 +2,16 @@
 
 {% block content %}
 <div class="message-box">
-    <h2>Room: {{code}}</h2>
+    <div class="room-title" style="text-align: center;">
+        <h2>Room: {{code}}</h2>
+    </div>
     
     <!-- New section for displaying members -->
     <div class="members">
         <h3>Members:</h3>
         <ul id="members-list">
             {% for member in members %}
-                <li>{{ member }}{% if member == session.get('name') %} (Me){% endif %}</li>
+                <li id="member-{{ loop.index }}">{{ member }}{% if member == session.get('name') %} (Me){% endif %}</li>
             {% endfor %}
         </ul>
     </div>
@@ -32,34 +34,64 @@
 
     const messages = document.getElementById('messages');
     
+    // Function to generate a random color
+    const getRandomColor = () => {
+        const letters = '0123456789ABCDEF';
+        let color = '#';
+        for (let i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    };
+
+    // Store colors for each user
+    const userColors = {};
+
     const createMessage = (name, msg) => {
-        //Date here is not actual time, just styling
-        //To get actual time, store in server and use that variable here
+        // Assign a color to the user if not already assigned
+        if (!userColors[name]) {
+            userColors[name] = getRandomColor();
+        }
+
         const content = `
         <div class="text">
-            <span>
-                <strong>${name}</strong>: ${msg}
-            </span>
+            <span style="color: ${userColors[name]}"><strong>${name}</strong>:</span> ${msg}
             <span class="muted">
                 ${new Date().toLocaleTimeString()}
             </span>
         </div>
-        `
+        `;
         messages.innerHTML += content;
     };
 
-    //From send() in main.py
+    // From send() in main.py
     socket.on('message', (data) => {
         createMessage(data.name, data.message);
     });
 
     const sendMessage = () => {
-        const message = document.getElementById('message')
+        const message = document.getElementById('message');
         if (message.value == "") return;
         socket.emit('message', {data: message.value});
         message.value = "";
     };
+
+    // Assign colors to members
+    const assignMemberColors = () => {
+        const membersList = document.getElementById('members-list').children;
+        for (let i = 0; i < membersList.length; i++) {
+            const memberName = membersList[i].innerText.split(' (')[0];
+            if (!userColors[memberName]) {
+                userColors[memberName] = getRandomColor();
+            }
+            membersList[i].style.color = userColors[memberName];
+        }
+    };
+
+    // Call the function to assign colors to members on DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', assignMemberColors);
 </script>
+
 {% for msg in messages %}
     <script type="text/javascript">
         createMessage("{{msg.name}}", "{{msg.message}}");
