@@ -95,10 +95,10 @@ h2, h3 {
 
 .members {
     border: 2px solid #ccc;
-    border-radius: 8px;
+    border-radius: 5px;
     background-color: #f9f9f9;
-    padding: 15px;
-    margin: 10px 0;
+    padding: 10px;
+    margin: 5px 0;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
@@ -107,14 +107,9 @@ h2, h3 {
     color: darkgray;
 }
 
-/* Message styles */
 .text {
     margin: 5px 0;
 }
 
-.muted {
-    font-size: 10px;
-    color: darkgray;
-}
 
 

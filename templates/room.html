@@ -90,6 +90,14 @@
 
     // Call the function to assign colors to members on DOMContentLoaded
     document.addEventListener('DOMContentLoaded', assignMemberColors);
+
+    // Enter key
+    document.getElementById('message').addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault(); // Prevent the default action
+            sendMessage(); // Call the sendMessage function
+        }
+    });
 </script>
 
 {% for msg in messages %}
